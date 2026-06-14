@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Massey Vo // Projects</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Press+Start+2P&display=swap" rel="stylesheet">
+<style>
+  :root {
+    /* Aurora / deep ocean palette */
+    --bg-1: #02101c;
+    --bg-2: #033a4d;
+    --bg-3: #0a5a6e;
+    --bg-4: #146b7e;
+
+    --dialog-bg: #e8f5f7;
+    --dialog-border-outer: #4ec5d4;
+    --dialog-border-inner: #0a5070;
+    --dialog-shadow: #021820;
+
+    --text: #0a3848;
+    --text-dim: #406878;
+    --text-light: #c8eef4;
+    --text-light-dim: #88b5c4;
+
+    --accent-teal: #2dd4bf;
+    --accent-teal-dark: #0d9488;
+    --accent-cyan: #22d3ee;
+    --accent-cyan-dark: #0891a8;
+    --accent-aurora: #7dd3c0;
+    --accent-glow: #5eead4;
+    --accent-bio: #a7f3d0;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'JetBrains Mono', monospace;
+    background: linear-gradient(180deg, var(--bg-1) 0%, var(--bg-2) 35%, var(--bg-3) 75%, var(--bg-4) 100%);
+    color: var(--text-light);
+    line-height: 1.7;
+    min-height: 100vh;
+    overflow-x: hidden;
+    position: relative;
+  }
+
+  /* Aurora waves */
+  .aurora {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: 100vh;
+    background:
+      radial-gradient(ellipse at 20% 30%, rgba(45, 212, 191, 0.25) 0%, transparent 55%),
+      radial-gradient(ellipse at 80% 20%, rgba(34, 211, 238, 0.2) 0%, transparent 55%),
+      radial-gradient(ellipse at 50% 70%, rgba(125, 211, 192, 0.18) 0%, transparent 60%);
+    z-index: 0;
+    pointer-events: none;
+    animation: auroraShift 22s ease-in-out infinite;
+  }
+  @keyframes auroraShift {
+    0%, 100% { opacity: 0.85; transform: translateX(0) translateY(0); }
+    50% { opacity: 1; transform: translateX(40px) translateY(-15px); }
+  }
+
+  /* Floating bioluminescent particles */
+  .particles {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    overflow: hidden;
+    z-index: 0;
+    pointer-events: none;
+  }
+  .particle {
+    position: absolute;
+    background: var(--accent-glow);
+    border-radius: 50%;
+    box-shadow: 0 0 8px var(--accent-glow);
+    animation: float linear infinite;
+    opacity: 0;
+  }
+  .particle.teal { background: var(--accent-teal); box-shadow: 0 0 8px var(--accent-teal); }
+  .particle.bio { background: var(--accent-bio); box-shadow: 0 0 10px var(--accent-bio); }
+  @keyframes float {
+    0% { transform: translateY(110vh) translateX(0); opacity: 0; }
+    10% { opacity: 0.7; }
+    90% { opacity: 0.7; }
+    100% { transform: translateY(-20px) translateX(60px); opacity: 0; }
+  }
+
+  /* Texture */
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.3 0 0 0 0 0.6 0 0 0 0 0.7 0 0 0 0.04 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 1000;
+    opacity: 0.5;
+    mix-blend-mode: overlay;
+  }
+
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    background: var(--dialog-bg);
+    padding: 14px 32px;
+    z-index: 100;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow:
+      inset 0 0 0 2px var(--dialog-border-outer),
+      inset 0 0 0 4px var(--dialog-bg),
+      inset 0 0 0 5px var(--dialog-border-inner),
+      0 4px 16px rgba(2, 24, 32, 0.5);
+  }
+  .nav-brand {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 12px;
+    color: var(--dialog-border-inner);
+    text-decoration: none;
+    letter-spacing: 1px;
+  }
+  .back-link {
+    color: var(--text-dim);
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 500;
+    transition: color 0.2s;
+  }
+  .back-link:hover { color: var(--accent-cyan-dark); }
+
+  main {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 110px 32px 120px;
+    position: relative;
+    z-index: 10;
+  }
+  @media (min-width: 1600px) {
+    main { max-width: 1500px; padding: 120px 48px 140px; }
+    h1 { font-size: 36px !important; }
+  }
+
+  .breadcrumb {
+    color: var(--accent-glow);
+    font-size: 13px;
+    margin-bottom: 24px;
+    text-shadow: 0 0 8px rgba(94, 234, 212, 0.4);
+  }
+  .breadcrumb a { color: var(--accent-cyan); text-decoration: none; }
+  .breadcrumb a:hover { color: var(--accent-bio); }
+
+  h1 {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 30px;
+    line-height: 1.4;
+    margin-bottom: 16px;
+    color: var(--text-light);
+    letter-spacing: 2px;
+    text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.5), 0 0 24px rgba(45, 212, 191, 0.5);
+  }
+  h1 .accent {
+    color: var(--accent-glow);
+    text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.5), 0 0 24px rgba(94, 234, 212, 0.6);
+  }
+
+  .subtitle {
+    color: var(--accent-glow);
+    font-size: 14px;
+    margin-bottom: 48px;
+    font-style: italic;
+    max-width: 700px;
+  }
+
+  .projects-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+    gap: 28px;
+    margin-bottom: 48px;
+  }
+
+  .project-card {
+    background: var(--dialog-bg);
+    padding: 28px;
+    border-radius: 12px;
+    transition: all 0.3s;
+    box-shadow:
+      inset 0 0 0 2px var(--dialog-border-outer),
+      inset 0 0 0 5px var(--dialog-bg),
+      inset 0 0 0 7px var(--dialog-border-inner),
+      0 5px 0 var(--dialog-shadow),
+      0 8px 24px rgba(2, 24, 32, 0.5);
+  }
+  .project-card:hover {
+    transform: translateY(-4px);
+    box-shadow:
+      inset 0 0 0 2px var(--accent-teal),
+      inset 0 0 0 5px var(--dialog-bg),
+      inset 0 0 0 7px var(--accent-teal-dark),
+      0 9px 0 var(--dialog-shadow),
+      0 12px 28px rgba(45, 212, 191, 0.3);
+  }
+
+  .project-card.linked {
+    cursor: pointer;
+  }
+  .project-card a.card-wrapper {
+    color: inherit;
+    text-decoration: none;
+    display: block;
+  }
+
+  .project-tag {
+    display: inline-block;
+    font-size: 11px;
+    color: var(--accent-cyan-dark);
+    background: rgba(34, 211, 238, 0.12);
+    border: 2px solid var(--accent-cyan);
+    padding: 3px 10px;
+    margin-right: 8px;
+    margin-bottom: 14px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border-radius: 12px;
+    font-weight: 500;
+  }
+
+  .project-title {
+    font-size: 20px;
+    font-weight: 500;
+    margin-bottom: 10px;
+    color: var(--text);
+  }
+
+  .project-stack {
+    font-size: 12px;
+    color: var(--accent-cyan-dark);
+    margin-bottom: 14px;
+    font-weight: 500;
+  }
+
+  .project-desc {
+    color: var(--text-dim);
+    font-size: 14px;
+    margin-bottom: 18px;
+  }
+
+  .project-metric {
+    display: inline-block;
+    font-size: 13px;
+    color: var(--accent-teal-dark);
+    font-weight: 500;
+    padding: 6px 12px;
+    background: rgba(45, 212, 191, 0.15);
+    border-radius: 6px;
+    border: 2px solid var(--accent-teal);
+  }
+
+  .project-cta {
+    margin-top: 18px;
+    padding-top: 14px;
+    border-top: 1px dashed var(--accent-teal);
+    color: var(--accent-teal-dark);
+    font-size: 12px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: color 0.2s;
+  }
+  .project-card.linked:hover .project-cta {
+    color: var(--dialog-border-inner);
+  }
+
+  footer {
+    margin-top: 60px;
+    padding: 24px;
+    text-align: center;
+    background: var(--dialog-bg);
+    border-radius: 12px;
+    box-shadow:
+      inset 0 0 0 2px var(--dialog-border-outer),
+      inset 0 0 0 4px var(--dialog-bg),
+      inset 0 0 0 5px var(--dialog-border-inner),
+      0 3px 0 var(--dialog-shadow);
+  }
+  .contact-links {
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+  }
+  .contact-links a {
+    color: var(--dialog-border-inner);
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 500;
+  }
+  .contact-links a:hover { color: var(--accent-cyan-dark); }
+  .footer-text { font-size: 11px; color: var(--text-dim); }
+
+  @media (max-width: 640px) {
+    nav { padding: 12px 16px; }
+    main { padding: 90px 20px 80px; }
+    h1 { font-size: 20px; }
+    .projects-grid { grid-template-columns: 1fr; }
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 28px;
+    list-style: none;
+  }
+  .nav-links a {
+    color: var(--text-dim);
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 500;
+    transition: color 0.2s;
+    cursor: pointer;
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    line-height: 1;
+    white-space: nowrap;
+  }
+  .nav-links a:hover, .nav-links a.active {
+    color: var(--accent-cyan-dark);
+  }
+  .nav-links a.active::before {
+    content: '▸';
+    color: var(--accent-cyan-dark);
+    margin-right: 4px;
+    font-size: 11px;
+    animation: bobArrow 0.8s ease-in-out infinite;
+    display: inline-block;
+  }
+  @keyframes bobArrow {
+    0%, 100% { transform: translateX(0); }
+    50% { transform: translateX(2px); }
+  }
+  @media (max-width: 640px) {
+    .nav-links {
+      gap: 14px;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+    }
+    .nav-links::-webkit-scrollbar { display: none; }
+    .nav-links a { font-size: 11px; }
+    .nav-links a.active::before { font-size: 9px; }
+  }
+
+
+  /* Van Gogh swirling stars */
+  .vangogh-scenery {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    width: 100%;
+    height: 100vh;
+    z-index: 0;
+    pointer-events: none;
+    overflow: hidden;
+  }
+  .vangogh-scenery svg {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: auto;
+    min-height: 100vh;
+  }
+  @keyframes starOrbPulse {
+    0%, 100% { opacity: 0.85; filter: brightness(1); }
+    50% { opacity: 1; filter: brightness(1.25); }
+  }
+  .star-orb {
+    animation: starOrbPulse 4s ease-in-out infinite;
+  }
+
+
+  /* Footer icon links */
+  .footer-icons {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    margin-bottom: 14px;
+    flex-wrap: wrap;
+  }
+  .footer-icon {
+    position: relative;
+    width: 44px;
+    height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    border-radius: 10px;
+    text-decoration: none;
+    color: var(--dialog-border-inner);
+    transition: all 0.15s;
+    padding: 0;
+    font-family: inherit;
+  }
+  .footer-icon svg {
+    width: 22px;
+    height: 22px;
+    transition: transform 0.2s;
+  }
+  .footer-icon:hover {
+    color: var(--accent-cedar-dark, var(--accent-magenta-dark, var(--accent-cyan-dark, var(--accent-coral-dark))));
+    transform: translateY(-2px);
+  }
+  .footer-icon:hover svg {
+    transform: scale(1.1);
+  }
+  .icon-label {
+    position: absolute;
+    bottom: -28px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--dialog-border-inner);
+    color: var(--dialog-bg);
+    padding: 3px 10px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 500;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s, bottom 0.2s;
+  }
+  .footer-icon:hover .icon-label {
+    opacity: 1;
+    bottom: -32px;
+  }
+  .footer-icon.copied .icon-label {
+    opacity: 1;
+    bottom: -32px;
+    background: var(--accent-cedar, var(--accent-magenta, var(--accent-cyan, var(--accent-coral))));
+    color: white;
+  }
+
+
+  /* Van Gogh star animations — independent layers */
+  @keyframes ringShimmer {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+  @keyframes swirlRotate {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+  @keyframes corePulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.25); opacity: 0.85; }
+  }
+
+  .star-orb .star-rings {
+    animation: ringShimmer 3s ease-in-out infinite;
+    transform-origin: center;
+    transform-box: fill-box;
+  }
+  .star-orb .star-swirls {
+    animation: swirlRotate 18s linear infinite;
+    transform-origin: center;
+    transform-box: fill-box;
+  }
+  .star-orb .star-core {
+    animation: corePulse 2.5s ease-in-out infinite;
+    transform-origin: center;
+    transform-box: fill-box;
+  }
+
+  /* Staggered timing per-star for organic feel */
+  .star-orb:nth-child(2n) .star-rings { animation-delay: 0.8s; }
+  .star-orb:nth-child(3n) .star-rings { animation-delay: 1.6s; }
+  .star-orb:nth-child(2n) .star-swirls { animation-direction: reverse; }
+  .star-orb:nth-child(3n) .star-swirls { animation-duration: 25s; }
+  .star-orb:nth-child(2n) .star-core { animation-delay: 0.5s; }
+  .star-orb:nth-child(3n) .star-core { animation-delay: 1.2s; animation-duration: 3s; }
+
+</style>
+</head>
+<body>
+
+<div class="vangogh-scenery">
+  <svg viewBox="0 0 1200 700" preserveAspectRatio="xMidYMax slice" xmlns="http://www.w3.org/2000/svg">
+    <g class="star-orb" transform="translate(180,180)" style="animation-delay: 0s;">
+      <g class="star-rings">
+        <circle cx="0" cy="0" r="42" fill="none" stroke="#2dd4bf" stroke-width="1" opacity="0.18"/>
+      <circle cx="0" cy="0" r="34" fill="none" stroke="#22d3ee" stroke-width="1.5" opacity="0.28"/>
+      <circle cx="0" cy="0" r="26" fill="none" stroke="#7dd3c0" stroke-width="2" opacity="0.4"/>
+            </g>
+      <g class="star-swirls">
+        <path d="M -20,-8 Q -10,-22 8,-20 Q 22,-10 20,8" fill="none" stroke="#a7f3d0" stroke-width="2" opacity="0.55" stroke-linecap="round"/>
+      <path d="M 20,8 Q 10,22 -8,20 Q -22,10 -20,-8" fill="none" stroke="#a7f3d0" stroke-width="2" opacity="0.55" stroke-linecap="round"/>
+            </g>
+      <g class="star-core">
+        <circle cx="0" cy="0" r="16" fill="#a7f3d0" opacity="0.4"/>
+      <circle cx="0" cy="0" r="9" fill="#e0fff9" opacity="0.75"/>
+      <circle cx="0" cy="0" r="4" fill="#ffffff"/>
+      </g>
+    </g>
+    <g class="star-orb" transform="translate(420,90)" style="animation-delay: 1s;">
+      <g class="star-rings">
+        <circle cx="0" cy="0" r="33" fill="none" stroke="#2dd4bf" stroke-width="1" opacity="0.18"/>
+      <circle cx="0" cy="0" r="27" fill="none" stroke="#22d3ee" stroke-width="1.5" opacity="0.28"/>
+      <circle cx="0" cy="0" r="20" fill="none" stroke="#7dd3c0" stroke-width="2" opacity="0.4"/>
+            </g>
+      <g class="star-swirls">
+        <path d="M -16,-6 Q -8,-17 6,-16 Q 17,-8 16,6" fill="none" stroke="#a7f3d0" stroke-width="2" opacity="0.55" stroke-linecap="round"/>
+      <path d="M 16,6 Q 8,17 -6,16 Q -17,8 -16,-6" fill="none" stroke="#a7f3d0" stroke-width="2" opacity="0.55" stroke-linecap="round"/>
+            </g>
+      <g class="star-core">
+        <circle cx="0" cy="0" r="12" fill="#a7f3d0" opacity="0.4"/>
+      <circle cx="0" cy="0" r="7" fill="#e0fff9" opacity="0.75"/>
+      <circle cx="0" cy="0" r="3" fill="#ffffff"/>
+      </g>
+    </g>
+    <g class="star-orb" transform="translate(620,200)" style="animation-delay: 2s;">
+      <g class="star-rings">
+        <circle cx="0" cy="0" r="37" fill="none" stroke="#2dd4bf" stroke-width="1" opacity="0.18"/>
+      <circle cx="0" cy="0" r="30" fill="none" stroke="#22d3ee" stroke-width="1.5" opacity="0.28"/>
+      <circle cx="0" cy="0" r="23" fill="none" stroke="#7dd3c0" stroke-width="2" opacity="0.4"/>
+            </g>
+      <g class="star-swirls">
+        <path d="M -18,-7 Q -9,-19 7,-18 Q 19,-9 18,7" fill="none" stroke="#a7f3d0" stroke-width="2" opacity="0.55" stroke-linecap="round"/>
+      <path d="M 18,7 Q 9,19 -7,18 Q -19,9 -18,-7" fill="none" stroke="#a7f3d0" stroke-width="2" opacity="0.55" stroke-linecap="round"/>
+            </g>
+      <g class="star-core">
+        <circle cx="0" cy="0" r="14" fill="#a7f3d0" opacity="0.4"/>
+      <circle cx="0" cy="0" r="8" fill="#e0fff9" opacity="0.75"/>
+      <circle cx="0" cy="0" r="3" fill="#ffffff"/>
+      </g>
+    </g>
+    <g class="star-orb" transform="translate(780,120)" style="animation-delay: 0.5s;">
+      <g class="star-rings">
+        <circle cx="0" cy="0" r="31" fill="none" stroke="#2dd4bf" stroke-width="1" opacity="0.18"/>
+      <circle cx="0" cy="0" r="25" fill="none" stroke="#22d3ee" stroke-width="1.5" opacity="0.28"/>
+      <circle cx="0" cy="0" r="19" fill="none" stroke="#7dd3c0" stroke-width="2" opacity="0.4"/>
+            </g>
+      <g class="star-swirls">
+        <path d="M -15,-6 Q -7,-16 6,-15 Q 16,-7 15,6" fill="none" stroke="#a7f3d0" stroke-width="2" opacity="0.55" stroke-linecap="round"/>
+      <path d="M 15,6 Q 7,16 -6,15 Q -16,7 -15,-6" fill="none" stroke="#a7f3d0" stroke-width="2" opacity="0.55" stroke-linecap="round"/>
+            </g>
+      <g class="star-core">
+        <circle cx="0" cy="0" r="12" fill="#a7f3d0" opacity="0.4"/>
+      <circle cx="0" cy="0" r="6" fill="#e0fff9" opacity="0.75"/>
+      <circle cx="0" cy="0" r="3" fill="#ffffff"/>
+      </g>
+    </g>
+    <g class="star-orb" transform="translate(280,320)" style="animation-delay: 1.5s;">
+      <g class="star-rings">
+        <circle cx="0" cy="0" r="27" fill="none" stroke="#2dd4bf" stroke-width="1" opacity="0.18"/>
+      <circle cx="0" cy="0" r="22" fill="none" stroke="#22d3ee" stroke-width="1.5" opacity="0.28"/>
+      <circle cx="0" cy="0" r="16" fill="none" stroke="#7dd3c0" stroke-width="2" opacity="0.4"/>
+            </g>
+      <g class="star-swirls">
+        <path d="M -13,-5 Q -6,-14 5,-13 Q 14,-6 13,5" fill="none" stroke="#a7f3d0" stroke-width="2" opacity="0.55" stroke-linecap="round"/>
+      <path d="M 13,5 Q 6,14 -5,13 Q -14,6 -13,-5" fill="none" stroke="#a7f3d0" stroke-width="2" opacity="0.55" stroke-linecap="round"/>
+            </g>
+      <g class="star-core">
+        <circle cx="0" cy="0" r="10" fill="#a7f3d0" opacity="0.4"/>
+      <circle cx="0" cy="0" r="5" fill="#e0fff9" opacity="0.75"/>
+      <circle cx="0" cy="0" r="2" fill="#ffffff"/>
+      </g>
+    </g>
+    <g class="star-orb" transform="translate(520,340)" style="animation-delay: 2.5s;">
+      <g class="star-rings">
+        <circle cx="0" cy="0" r="25" fill="none" stroke="#2dd4bf" stroke-width="1" opacity="0.18"/>
+      <circle cx="0" cy="0" r="20" fill="none" stroke="#22d3ee" stroke-width="1.5" opacity="0.28"/>
+      <circle cx="0" cy="0" r="15" fill="none" stroke="#7dd3c0" stroke-width="2" opacity="0.4"/>
+            </g>
+      <g class="star-swirls">
+        <path d="M -12,-4 Q -6,-13 4,-12 Q 13,-6 12,4" fill="none" stroke="#a7f3d0" stroke-width="2" opacity="0.55" stroke-linecap="round"/>
+      <path d="M 12,4 Q 6,13 -4,12 Q -13,6 -12,-4" fill="none" stroke="#a7f3d0" stroke-width="2" opacity="0.55" stroke-linecap="round"/>
+            </g>
+      <g class="star-core">
+        <circle cx="0" cy="0" r="9" fill="#a7f3d0" opacity="0.4"/>
+      <circle cx="0" cy="0" r="5" fill="#e0fff9" opacity="0.75"/>
+      <circle cx="0" cy="0" r="2" fill="#ffffff"/>
+      </g>
+    </g>
+    <g class="star-orb" transform="translate(1080,320)" style="animation-delay: 0.8s;">
+      <g class="star-rings">
+        <circle cx="0" cy="0" r="29" fill="none" stroke="#2dd4bf" stroke-width="1" opacity="0.18"/>
+      <circle cx="0" cy="0" r="23" fill="none" stroke="#22d3ee" stroke-width="1.5" opacity="0.28"/>
+      <circle cx="0" cy="0" r="18" fill="none" stroke="#7dd3c0" stroke-width="2" opacity="0.4"/>
+            </g>
+      <g class="star-swirls">
+        <path d="M -14,-5 Q -7,-15 5,-14 Q 15,-7 14,5" fill="none" stroke="#a7f3d0" stroke-width="2" opacity="0.55" stroke-linecap="round"/>
+      <path d="M 14,5 Q 7,15 -5,14 Q -15,7 -14,-5" fill="none" stroke="#a7f3d0" stroke-width="2" opacity="0.55" stroke-linecap="round"/>
+            </g>
+      <g class="star-core">
+        <circle cx="0" cy="0" r="11" fill="#a7f3d0" opacity="0.4"/>
+      <circle cx="0" cy="0" r="6" fill="#e0fff9" opacity="0.75"/>
+      <circle cx="0" cy="0" r="2" fill="#ffffff"/>
+      </g>
+    </g>
+    <g class="star-orb" transform="translate(80,400)" style="animation-delay: 1.8s;">
+      <g class="star-rings">
+        <circle cx="0" cy="0" r="23" fill="none" stroke="#2dd4bf" stroke-width="1" opacity="0.18"/>
+      <circle cx="0" cy="0" r="18" fill="none" stroke="#22d3ee" stroke-width="1.5" opacity="0.28"/>
+      <circle cx="0" cy="0" r="14" fill="none" stroke="#7dd3c0" stroke-width="2" opacity="0.4"/>
+            </g>
+      <g class="star-swirls">
+        <path d="M -11,-4 Q -5,-12 4,-11 Q 12,-5 11,4" fill="none" stroke="#a7f3d0" stroke-width="2" opacity="0.55" stroke-linecap="round"/>
+      <path d="M 11,4 Q 5,12 -4,11 Q -12,5 -11,-4" fill="none" stroke="#a7f3d0" stroke-width="2" opacity="0.55" stroke-linecap="round"/>
+            </g>
+      <g class="star-core">
+        <circle cx="0" cy="0" r="8" fill="#a7f3d0" opacity="0.4"/>
+      <circle cx="0" cy="0" r="4" fill="#e0fff9" opacity="0.75"/>
+      <circle cx="0" cy="0" r="2" fill="#ffffff"/>
+      </g>
+    </g>
+  </svg>
+</div>
+
+
+<div class="aurora"></div>
+<div class="particles" id="particles"></div>
+
+<nav>
+  <a href="index.html" class="nav-brand">MV//</a>
+  <ul class="nav-links">
+    <li><a href="index.html" class="nav-link">Home</a></li>
+    <li><a href="resume.html" class="nav-link">Resume</a></li>
+    <li><a href="projects.html" class="nav-link active">Projects</a></li>
+    <li><a href="nowplaying.html" class="nav-link">Now Playing</a></li>
+    <li><a href="food.html" class="nav-link">Food</a></li>
+  </ul>
+</nav>
+
+<main>
+
+  <div class="breadcrumb">
+    <a href="index.html">Portfolio</a> / Projects
+  </div>
+
+  <h1>Projects<span class="accent">.</span></h1>
+  <p class="subtitle">A collection of work spanning research, engineering, and hands-on building. Click any project marked with "→" for the full case study.</p>
+
+  <div class="projects-grid">
+
+    <a href="research-traffic-signals.html" class="card-wrapper">
+      <div class="project-card linked">
+        <div>
+          <span class="project-tag">Research</span>
+          <span class="project-tag">Python Engineering</span>
+        </div>
+        <div class="project-title">AI-Driven Traffic Signal Optimization</div>
+        <div class="project-stack">Python · SUMO · Q-Learning · Reinforcement Learning</div>
+        <div class="project-desc">Independently designed, built, and evaluated a Python-based Q-Learning system for adaptive traffic signal control at the University of Electro-Communications (AWCC), Tokyo. End-to-end engineering work from problem framing through final research paper, simulated across 0–100% connected vehicle penetration rates.</div>
+        <div class="project-metric">→ Achieved 9.1–16.9% reduction in average vehicle delay</div>
+        <div class="project-cta">Read full case study →</div>
+      </div>
+    </a>
+
+    <div class="project-card">
+      <div>
+        <span class="project-tag">Capstone</span>
+        <span class="project-tag">Project Management</span>
+      </div>
+      <div class="project-title">Digital Exhibit Platform — Schusterman Library</div>
+      <div class="project-stack">Islandora · Drupal · Metadata Standards</div>
+      <div class="project-desc">Led project coordination for a four-person team building a digital exhibit platform for an institutional client. Managed sponsor requirements gathering, tracked weekly deliverables, and brought the project from requirements to final client presentation.</div>
+      <div class="project-metric">→ Delivered on schedule, full client sign-off</div>
+    </div>
+
+    <div class="project-card">
+      <div>
+        <span class="project-tag">Hardware</span>
+        <span class="project-tag">Independent</span>
+      </div>
+      <div class="project-title">Custom PC Builds & Local IT Support</div>
+      <div class="project-stack">Component-level repair · Diagnostics · System deployment</div>
+      <div class="project-desc">Built 10+ custom desktop computers from individual components, covering CPU/GPU installation, RAM and storage configuration, BIOS setup, and OS deployment. Provided hardware troubleshooting and system updates for local businesses including a dental clinic in Pryor, OK.</div>
+      <div class="project-metric">→ 10+ builds completed</div>
+    </div>
+
+  </div>
+
+  <footer class="reveal">
+    <div class="footer-icons">
+      <a href="https://www.linkedin.com/in/massey-vo-856518291" target="_blank" rel="noopener" class="footer-icon" aria-label="LinkedIn" title="Open LinkedIn">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
+        <span class="icon-label">LinkedIn</span>
+      </a>
+      <button type="button" class="footer-icon" data-copy-email="masseyvo000@gmail.com" aria-label="Copy email address" title="Copy email address">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        <span class="icon-label">Copy email</span>
+      </button>
+    </div>
+    <div class="footer-text">© 2026 Massey Vo · Drifting through the deep</div>
+  </footer>
+
+</main>
+
+<script>
+const particles = document.getElementById('particles');
+const types = ['', '', 'teal', 'bio'];
+for (let i = 0; i < 40; i++) {
+  const p = document.createElement('div');
+  p.className = 'particle ' + types[Math.floor(Math.random() * types.length)];
+  const size = Math.random() * 4 + 2;
+  p.style.width = size + 'px';
+  p.style.height = size + 'px';
+  p.style.left = Math.random() * 100 + '%';
+  p.style.animationDuration = (Math.random() * 20 + 15) + 's';
+  p.style.animationDelay = (Math.random() * 20) + 's';
+  particles.appendChild(p);
+}
+
+// Footer email copy
+document.querySelectorAll('[data-copy-email]').forEach(btn => {
+  btn.addEventListener('click', async () => {
+    const email = btn.dataset.copyEmail;
+    const label = btn.querySelector('.icon-label');
+    try {
+      await navigator.clipboard.writeText(email);
+      const orig = label.textContent;
+      label.textContent = 'Copied!';
+      btn.classList.add('copied');
+      setTimeout(() => {
+        btn.classList.remove('copied');
+        label.textContent = orig;
+      }, 1800);
+    } catch (e) {
+      window.location.href = 'mailto:' + email;
+    }
+  });
+});
+
+</script>
+
+</body>
+</html>

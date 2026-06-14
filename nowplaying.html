@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Massey Vo // Now Playing</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Press+Start+2P&display=swap" rel="stylesheet">
+<style>
+  :root {
+    /* Sunset / dusk palette */
+    --bg-1: #1a0a35;
+    --bg-2: #4a1a5e;
+    --bg-3: #8a2b6e;
+    --bg-4: #c2466a;
+
+    --dialog-bg: #fff0e8;
+    --dialog-border-outer: #f59880;
+    --dialog-border-inner: #a83a4f;
+    --dialog-shadow: #2a0a25;
+
+    --text: #3a1525;
+    --text-dim: #7a4858;
+    --text-light: #ffe0d4;
+    --text-light-dim: #ddb5a8;
+
+    --accent-coral: #ff7a59;
+    --accent-coral-dark: #c84a2c;
+    --accent-amber: #fbbf24;
+    --accent-amber-dark: #d99a00;
+    --accent-pink: #ec4899;
+    --accent-purple: #a855f7;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'JetBrains Mono', monospace;
+    background: linear-gradient(180deg, var(--bg-1) 0%, var(--bg-2) 30%, var(--bg-3) 65%, var(--bg-4) 100%);
+    color: var(--text-light);
+    line-height: 1.7;
+    min-height: 100vh;
+    overflow-x: hidden;
+    position: relative;
+  }
+
+  /* Sunset glow */
+  .sunset {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: 100vh;
+    background:
+      radial-gradient(ellipse at 50% 90%, rgba(255, 122, 89, 0.4) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 70%, rgba(251, 191, 36, 0.2) 0%, transparent 45%),
+      radial-gradient(ellipse at 20% 80%, rgba(236, 72, 153, 0.15) 0%, transparent 50%);
+    z-index: 0;
+    pointer-events: none;
+    animation: sunsetShift 28s ease-in-out infinite;
+  }
+  @keyframes sunsetShift {
+    0%, 100% { opacity: 0.85; }
+    50% { opacity: 1; }
+  }
+
+  /* Stars in the upper twilight */
+  .twilight-stars {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: 40vh;
+    overflow: hidden;
+    z-index: 0;
+    pointer-events: none;
+  }
+  .twi-star {
+    position: absolute;
+    background: white;
+    border-radius: 50%;
+    animation: twinkle 3s ease-in-out infinite;
+  }
+  .twi-star.amber { background: var(--accent-amber); box-shadow: 0 0 4px var(--accent-amber); }
+  .twi-star.pink { background: var(--accent-pink); box-shadow: 0 0 4px var(--accent-pink); }
+  @keyframes twinkle {
+    0%, 100% { opacity: 0.3; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.3); }
+  }
+
+  /* Texture */
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.7 0 0 0 0 0.4 0 0 0 0 0.5 0 0 0 0.04 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 1000;
+    opacity: 0.5;
+    mix-blend-mode: overlay;
+  }
+
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    background: var(--dialog-bg);
+    padding: 14px 32px;
+    z-index: 100;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow:
+      inset 0 0 0 2px var(--dialog-border-outer),
+      inset 0 0 0 4px var(--dialog-bg),
+      inset 0 0 0 5px var(--dialog-border-inner),
+      0 4px 16px rgba(42, 10, 37, 0.5);
+  }
+  .nav-brand {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 12px;
+    color: var(--dialog-border-inner);
+    text-decoration: none;
+    letter-spacing: 1px;
+  }
+  .back-link {
+    color: var(--text-dim);
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 500;
+    transition: color 0.2s;
+  }
+  .back-link:hover { color: var(--accent-coral-dark); }
+
+  main {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 110px 32px 120px;
+    position: relative;
+    z-index: 10;
+  }
+  @media (min-width: 1600px) {
+    main { max-width: 1500px; padding: 120px 48px 140px; }
+    h1 { font-size: 36px !important; }
+  }
+
+  .breadcrumb {
+    color: var(--accent-amber);
+    font-size: 13px;
+    margin-bottom: 24px;
+    text-shadow: 0 0 8px rgba(251, 191, 36, 0.4);
+  }
+  .breadcrumb a { color: var(--accent-coral); text-decoration: none; }
+  .breadcrumb a:hover { color: var(--accent-amber); }
+
+  h1 {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 30px;
+    line-height: 1.4;
+    margin-bottom: 16px;
+    color: var(--text-light);
+    letter-spacing: 2px;
+    text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.5), 0 0 24px rgba(255, 122, 89, 0.5);
+  }
+  h1 .accent {
+    color: var(--accent-amber);
+    text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.5), 0 0 24px rgba(251, 191, 36, 0.6);
+  }
+
+  .subtitle {
+    color: var(--accent-amber);
+    font-size: 14px;
+    margin-bottom: 48px;
+    font-style: italic;
+    max-width: 700px;
+  }
+
+  .now-playing-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+    gap: 28px;
+    margin-bottom: 48px;
+  }
+
+  .np-card {
+    background: var(--dialog-bg);
+    padding: 28px;
+    border-radius: 12px;
+    transition: all 0.3s;
+    box-shadow:
+      inset 0 0 0 2px var(--dialog-border-outer),
+      inset 0 0 0 5px var(--dialog-bg),
+      inset 0 0 0 7px var(--dialog-border-inner),
+      0 5px 0 var(--dialog-shadow),
+      0 8px 24px rgba(42, 10, 37, 0.5);
+  }
+  .np-card:hover {
+    transform: translateY(-4px);
+  }
+
+  .np-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    color: var(--accent-coral-dark);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 14px;
+    font-weight: 500;
+  }
+  .np-dot {
+    width: 10px; height: 10px;
+    background: var(--accent-coral);
+    border-radius: 50%;
+    animation: pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 122, 89, 0.5); }
+    50% { opacity: 0.7; transform: scale(0.85); box-shadow: 0 0 0 8px rgba(255, 122, 89, 0); }
+  }
+
+  .np-title {
+    font-size: 20px;
+    margin-bottom: 12px;
+    color: var(--text);
+  }
+
+  .np-desc {
+    color: var(--text-dim);
+    font-size: 14px;
+    margin-bottom: 0;
+  }
+
+  .np-placeholder {
+    background: rgba(245, 152, 128, 0.1);
+    border: 2px dashed var(--accent-coral);
+    padding: 40px;
+    text-align: center;
+    color: var(--text-dim);
+    font-size: 13px;
+    border-radius: 8px;
+  }
+
+  .intro-block {
+    background: var(--dialog-bg);
+    padding: 24px 28px;
+    border-radius: 12px;
+    margin-bottom: 28px;
+    box-shadow:
+      inset 0 0 0 2px var(--dialog-border-outer),
+      inset 0 0 0 4px var(--dialog-bg),
+      inset 0 0 0 5px var(--dialog-border-inner),
+      0 3px 0 var(--dialog-shadow);
+  }
+  .intro-block p {
+    color: var(--text);
+    font-size: 14px;
+  }
+  .intro-block strong { color: var(--accent-coral-dark); }
+
+  footer {
+    margin-top: 60px;
+    padding: 24px;
+    text-align: center;
+    background: var(--dialog-bg);
+    border-radius: 12px;
+    box-shadow:
+      inset 0 0 0 2px var(--dialog-border-outer),
+      inset 0 0 0 4px var(--dialog-bg),
+      inset 0 0 0 5px var(--dialog-border-inner),
+      0 3px 0 var(--dialog-shadow);
+  }
+  .contact-links {
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+  }
+  .contact-links a {
+    color: var(--dialog-border-inner);
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 500;
+  }
+  .contact-links a:hover { color: var(--accent-coral-dark); }
+  .footer-text { font-size: 11px; color: var(--text-dim); }
+
+  @media (max-width: 640px) {
+    nav { padding: 12px 16px; }
+    main { padding: 90px 20px 80px; }
+    h1 { font-size: 20px; }
+    .now-playing-grid { grid-template-columns: 1fr; }
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 28px;
+    list-style: none;
+  }
+  .nav-links a {
+    color: var(--text-dim);
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 500;
+    transition: color 0.2s;
+    cursor: pointer;
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    line-height: 1;
+    white-space: nowrap;
+  }
+  .nav-links a:hover, .nav-links a.active {
+    color: var(--accent-coral-dark);
+  }
+  .nav-links a.active::before {
+    content: '▸';
+    color: var(--accent-coral-dark);
+    margin-right: 4px;
+    font-size: 11px;
+    animation: bobArrow 0.8s ease-in-out infinite;
+    display: inline-block;
+  }
+  @keyframes bobArrow {
+    0%, 100% { transform: translateX(0); }
+    50% { transform: translateX(2px); }
+  }
+  @media (max-width: 640px) {
+    .nav-links {
+      gap: 14px;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+    }
+    .nav-links::-webkit-scrollbar { display: none; }
+    .nav-links a { font-size: 11px; }
+    .nav-links a.active::before { font-size: 9px; }
+  }
+
+
+  /* Van Gogh swirling stars */
+  .vangogh-scenery {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    width: 100%;
+    height: 100vh;
+    z-index: 0;
+    pointer-events: none;
+    overflow: hidden;
+  }
+  .vangogh-scenery svg {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: auto;
+    min-height: 100vh;
+  }
+  @keyframes starOrbPulse {
+    0%, 100% { opacity: 0.85; filter: brightness(1); }
+    50% { opacity: 1; filter: brightness(1.25); }
+  }
+  .star-orb {
+    animation: starOrbPulse 4s ease-in-out infinite;
+  }
+
+
+  /* Footer icon links */
+  .footer-icons {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    margin-bottom: 14px;
+    flex-wrap: wrap;
+  }
+  .footer-icon {
+    position: relative;
+    width: 44px;
+    height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    border-radius: 10px;
+    text-decoration: none;
+    color: var(--dialog-border-inner);
+    transition: all 0.15s;
+    padding: 0;
+    font-family: inherit;
+  }
+  .footer-icon svg {
+    width: 22px;
+    height: 22px;
+    transition: transform 0.2s;
+  }
+  .footer-icon:hover {
+    color: var(--accent-cedar-dark, var(--accent-magenta-dark, var(--accent-cyan-dark, var(--accent-coral-dark))));
+    transform: translateY(-2px);
+  }
+  .footer-icon:hover svg {
+    transform: scale(1.1);
+  }
+  .icon-label {
+    position: absolute;
+    bottom: -28px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--dialog-border-inner);
+    color: var(--dialog-bg);
+    padding: 3px 10px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 500;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s, bottom 0.2s;
+  }
+  .footer-icon:hover .icon-label {
+    opacity: 1;
+    bottom: -32px;
+  }
+  .footer-icon.copied .icon-label {
+    opacity: 1;
+    bottom: -32px;
+    background: var(--accent-cedar, var(--accent-magenta, var(--accent-cyan, var(--accent-coral))));
+    color: white;
+  }
+
+
+  /* Van Gogh star animations — independent layers */
+  @keyframes ringShimmer {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+  @keyframes swirlRotate {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+  @keyframes corePulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.25); opacity: 0.85; }
+  }
+
+  .star-orb .star-rings {
+    animation: ringShimmer 3s ease-in-out infinite;
+    transform-origin: center;
+    transform-box: fill-box;
+  }
+  .star-orb .star-swirls {
+    animation: swirlRotate 18s linear infinite;
+    transform-origin: center;
+    transform-box: fill-box;
+  }
+  .star-orb .star-core {
+    animation: corePulse 2.5s ease-in-out infinite;
+    transform-origin: center;
+    transform-box: fill-box;
+  }
+
+  /* Staggered timing per-star for organic feel */
+  .star-orb:nth-child(2n) .star-rings { animation-delay: 0.8s; }
+  .star-orb:nth-child(3n) .star-rings { animation-delay: 1.6s; }
+  .star-orb:nth-child(2n) .star-swirls { animation-direction: reverse; }
+  .star-orb:nth-child(3n) .star-swirls { animation-duration: 25s; }
+  .star-orb:nth-child(2n) .star-core { animation-delay: 0.5s; }
+  .star-orb:nth-child(3n) .star-core { animation-delay: 1.2s; animation-duration: 3s; }
+
+</style>
+</head>
+<body>
+
+<div class="vangogh-scenery">
+  <svg viewBox="0 0 1200 700" preserveAspectRatio="xMidYMax slice" xmlns="http://www.w3.org/2000/svg">
+    <g class="star-orb" transform="translate(180,180)" style="animation-delay: 0s;">
+      <g class="star-rings">
+        <circle cx="0" cy="0" r="42" fill="none" stroke="#ff7a59" stroke-width="1" opacity="0.18"/>
+      <circle cx="0" cy="0" r="34" fill="none" stroke="#fbbf24" stroke-width="1.5" opacity="0.28"/>
+      <circle cx="0" cy="0" r="26" fill="none" stroke="#ec4899" stroke-width="2" opacity="0.4"/>
+            </g>
+      <g class="star-swirls">
+        <path d="M -20,-8 Q -10,-22 8,-20 Q 22,-10 20,8" fill="none" stroke="#ffd4a8" stroke-width="2" opacity="0.55" stroke-linecap="round"/>
+      <path d="M 20,8 Q 10,22 -8,20 Q -22,10 -20,-8" fill="none" stroke="#ffd4a8" stroke-width="2" opacity="0.55" stroke-linecap="round"/>
+            </g>
+      <g class="star-core">
+        <circle cx="0" cy="0" r="16" fill="#ffd4a8" opacity="0.4"/>
+      <circle cx="0" cy="0" r="9" fill="#fff4e0" opacity="0.75"/>
+      <circle cx="0" cy="0" r="4" fill="#ffffff"/>
+      </g>
+    </g>
+    <g class="star-orb" transform="translate(420,90)" style="animation-delay: 1s;">
+      <g class="star-rings">
+        <circle cx="0" cy="0" r="33" fill="none" stroke="#ff7a59" stroke-width="1" opacity="0.18"/>
+      <circle cx="0" cy="0" r="27" fill="none" stroke="#fbbf24" stroke-width="1.5" opacity="0.28"/>
+      <circle cx="0" cy="0" r="20" fill="none" stroke="#ec4899" stroke-width="2" opacity="0.4"/>
+            </g>
+      <g class="star-swirls">
+        <path d="M -16,-6 Q -8,-17 6,-16 Q 17,-8 16,6" fill="none" stroke="#ffd4a8" stroke-width="2" opacity="0.55" stroke-linecap="round"/>
+      <path d="M 16,6 Q 8,17 -6,16 Q -17,8 -16,-6" fill="none" stroke="#ffd4a8" stroke-width="2" opacity="0.55" stroke-linecap="round"/>
+            </g>
+      <g class="star-core">
+        <circle cx="0" cy="0" r="12" fill="#ffd4a8" opacity="0.4"/>
+      <circle cx="0" cy="0" r="7" fill="#fff4e0" opacity="0.75"/>
+      <circle cx="0" cy="0" r="3" fill="#ffffff"/>
+      </g>
+    </g>
+    <g class="star-orb" transform="translate(620,200)" style="animation-delay: 2s;">
+      <g class="star-rings">
+        <circle cx="0" cy="0" r="37" fill="none" stroke="#ff7a59" stroke-width="1" opacity="0.18"/>
+      <circle cx="0" cy="0" r="30" fill="none" stroke="#fbbf24" stroke-width="1.5" opacity="0.28"/>
+      <circle cx="0" cy="0" r="23" fill="none" stroke="#ec4899" stroke-width="2" opacity="0.4"/>
+            </g>
+      <g class="star-swirls">
+        <path d="M -18,-7 Q -9,-19 7,-18 Q 19,-9 18,7" fill="none" stroke="#ffd4a8" stroke-width="2" opacity="0.55" stroke-linecap="round"/>
+      <path d="M 18,7 Q 9,19 -7,18 Q -19,9 -18,-7" fill="none" stroke="#ffd4a8" stroke-width="2" opacity="0.55" stroke-linecap="round"/>
+            </g>
+      <g class="star-core">
+        <circle cx="0" cy="0" r="14" fill="#ffd4a8" opacity="0.4"/>
+      <circle cx="0" cy="0" r="8" fill="#fff4e0" opacity="0.75"/>
+      <circle cx="0" cy="0" r="3" fill="#ffffff"/>
+      </g>
+    </g>
+    <g class="star-orb" transform="translate(780,120)" style="animation-delay: 0.5s;">
+      <g class="star-rings">
+        <circle cx="0" cy="0" r="31" fill="none" stroke="#ff7a59" stroke-width="1" opacity="0.18"/>
+      <circle cx="0" cy="0" r="25" fill="none" stroke="#fbbf24" stroke-width="1.5" opacity="0.28"/>
+      <circle cx="0" cy="0" r="19" fill="none" stroke="#ec4899" stroke-width="2" opacity="0.4"/>
+            </g>
+      <g class="star-swirls">
+        <path d="M -15,-6 Q -7,-16 6,-15 Q 16,-7 15,6" fill="none" stroke="#ffd4a8" stroke-width="2" opacity="0.55" stroke-linecap="round"/>
+      <path d="M 15,6 Q 7,16 -6,15 Q -16,7 -15,-6" fill="none" stroke="#ffd4a8" stroke-width="2" opacity="0.55" stroke-linecap="round"/>
+            </g>
+      <g class="star-core">
+        <circle cx="0" cy="0" r="12" fill="#ffd4a8" opacity="0.4"/>
+      <circle cx="0" cy="0" r="6" fill="#fff4e0" opacity="0.75"/>
+      <circle cx="0" cy="0" r="3" fill="#ffffff"/>
+      </g>
+    </g>
+    <g class="star-orb" transform="translate(280,320)" style="animation-delay: 1.5s;">
+      <g class="star-rings">
+        <circle cx="0" cy="0" r="27" fill="none" stroke="#ff7a59" stroke-width="1" opacity="0.18"/>
+      <circle cx="0" cy="0" r="22" fill="none" stroke="#fbbf24" stroke-width="1.5" opacity="0.28"/>
+      <circle cx="0" cy="0" r="16" fill="none" stroke="#ec4899" stroke-width="2" opacity="0.4"/>
+            </g>
+      <g class="star-swirls">
+        <path d="M -13,-5 Q -6,-14 5,-13 Q 14,-6 13,5" fill="none" stroke="#ffd4a8" stroke-width="2" opacity="0.55" stroke-linecap="round"/>
+      <path d="M 13,5 Q 6,14 -5,13 Q -14,6 -13,-5" fill="none" stroke="#ffd4a8" stroke-width="2" opacity="0.55" stroke-linecap="round"/>
+            </g>
+      <g class="star-core">
+        <circle cx="0" cy="0" r="10" fill="#ffd4a8" opacity="0.4"/>
+      <circle cx="0" cy="0" r="5" fill="#fff4e0" opacity="0.75"/>
+      <circle cx="0" cy="0" r="2" fill="#ffffff"/>
+      </g>
+    </g>
+    <g class="star-orb" transform="translate(520,340)" style="animation-delay: 2.5s;">
+      <g class="star-rings">
+        <circle cx="0" cy="0" r="25" fill="none" stroke="#ff7a59" stroke-width="1" opacity="0.18"/>
+      <circle cx="0" cy="0" r="20" fill="none" stroke="#fbbf24" stroke-width="1.5" opacity="0.28"/>
+      <circle cx="0" cy="0" r="15" fill="none" stroke="#ec4899" stroke-width="2" opacity="0.4"/>
+            </g>
+      <g class="star-swirls">
+        <path d="M -12,-4 Q -6,-13 4,-12 Q 13,-6 12,4" fill="none" stroke="#ffd4a8" stroke-width="2" opacity="0.55" stroke-linecap="round"/>
+      <path d="M 12,4 Q 6,13 -4,12 Q -13,6 -12,-4" fill="none" stroke="#ffd4a8" stroke-width="2" opacity="0.55" stroke-linecap="round"/>
+            </g>
+      <g class="star-core">
+        <circle cx="0" cy="0" r="9" fill="#ffd4a8" opacity="0.4"/>
+      <circle cx="0" cy="0" r="5" fill="#fff4e0" opacity="0.75"/>
+      <circle cx="0" cy="0" r="2" fill="#ffffff"/>
+      </g>
+    </g>
+    <g class="star-orb" transform="translate(1080,320)" style="animation-delay: 0.8s;">
+      <g class="star-rings">
+        <circle cx="0" cy="0" r="29" fill="none" stroke="#ff7a59" stroke-width="1" opacity="0.18"/>
+      <circle cx="0" cy="0" r="23" fill="none" stroke="#fbbf24" stroke-width="1.5" opacity="0.28"/>
+      <circle cx="0" cy="0" r="18" fill="none" stroke="#ec4899" stroke-width="2" opacity="0.4"/>
+            </g>
+      <g class="star-swirls">
+        <path d="M -14,-5 Q -7,-15 5,-14 Q 15,-7 14,5" fill="none" stroke="#ffd4a8" stroke-width="2" opacity="0.55" stroke-linecap="round"/>
+      <path d="M 14,5 Q 7,15 -5,14 Q -15,7 -14,-5" fill="none" stroke="#ffd4a8" stroke-width="2" opacity="0.55" stroke-linecap="round"/>
+            </g>
+      <g class="star-core">
+        <circle cx="0" cy="0" r="11" fill="#ffd4a8" opacity="0.4"/>
+      <circle cx="0" cy="0" r="6" fill="#fff4e0" opacity="0.75"/>
+      <circle cx="0" cy="0" r="2" fill="#ffffff"/>
+      </g>
+    </g>
+    <g class="star-orb" transform="translate(80,400)" style="animation-delay: 1.8s;">
+      <g class="star-rings">
+        <circle cx="0" cy="0" r="23" fill="none" stroke="#ff7a59" stroke-width="1" opacity="0.18"/>
+      <circle cx="0" cy="0" r="18" fill="none" stroke="#fbbf24" stroke-width="1.5" opacity="0.28"/>
+      <circle cx="0" cy="0" r="14" fill="none" stroke="#ec4899" stroke-width="2" opacity="0.4"/>
+            </g>
+      <g class="star-swirls">
+        <path d="M -11,-4 Q -5,-12 4,-11 Q 12,-5 11,4" fill="none" stroke="#ffd4a8" stroke-width="2" opacity="0.55" stroke-linecap="round"/>
+      <path d="M 11,4 Q 5,12 -4,11 Q -12,5 -11,-4" fill="none" stroke="#ffd4a8" stroke-width="2" opacity="0.55" stroke-linecap="round"/>
+            </g>
+      <g class="star-core">
+        <circle cx="0" cy="0" r="8" fill="#ffd4a8" opacity="0.4"/>
+      <circle cx="0" cy="0" r="4" fill="#fff4e0" opacity="0.75"/>
+      <circle cx="0" cy="0" r="2" fill="#ffffff"/>
+      </g>
+    </g>
+  </svg>
+</div>
+
+
+<div class="sunset"></div>
+<div class="twilight-stars" id="twilight"></div>
+
+<nav>
+  <a href="index.html" class="nav-brand">MV//</a>
+  <ul class="nav-links">
+    <li><a href="index.html" class="nav-link">Home</a></li>
+    <li><a href="resume.html" class="nav-link">Resume</a></li>
+    <li><a href="projects.html" class="nav-link">Projects</a></li>
+    <li><a href="nowplaying.html" class="nav-link active">Now Playing</a></li>
+    <li><a href="food.html" class="nav-link">Food</a></li>
+  </ul>
+</nav>
+
+<main>
+
+  <div class="breadcrumb">
+    <a href="index.html">Portfolio</a> / Now Playing
+  </div>
+
+  <h1>Now <span class="accent">Playing</span></h1>
+  <p class="subtitle">What I'm currently learning, building, and exploring — the soundtrack to my week.</p>
+
+  <div class="intro-block">
+    <p>A snapshot of where my attention is right now. These shift over time as projects close and new ones open. <strong>Last updated:</strong> 2026.</p>
+  </div>
+
+  <div class="now-playing-grid">
+
+    <div class="np-card">
+      <div class="np-status">
+        <span class="np-dot"></span>
+        Currently exploring
+      </div>
+      <div class="np-title">Cloud Security & Infrastructure</div>
+      <div class="np-desc">Deepening practical knowledge of cloud security architecture and infrastructure operations, drawing on day-to-day exposure at a hyperscale cloud facility.</div>
+    </div>
+
+    <div class="np-card">
+      <div class="np-status">
+        <span class="np-dot"></span>
+        In progress
+      </div>
+      <div class="np-title">Python for Security Automation</div>
+      <div class="np-desc">Building Python tooling for log parsing, alert triage, and SIEM workflow automation. Turning the repetitive parts of SOC work into something that runs on its own.</div>
+    </div>
+
+    <div class="np-card">
+      <div class="np-status">
+        <span class="np-dot"></span>
+        On the journey
+      </div>
+      <div class="np-title">Japanese Language</div>
+      <div class="np-desc">Six semesters of formal coursework at OU and a full year living in Tokyo got me started. Now I'm continuing the road to fluency, one chapter at a time, with JLPT certification on the horizon.</div>
+    </div>
+
+    <div class="np-card">
+      <div class="np-status">
+        <span class="np-dot"></span>
+        Open slot
+      </div>
+      <div class="np-title">Coming soon</div>
+      <div class="np-placeholder">// Future projects, videos, and experiments will land here</div>
+    </div>
+
+  </div>
+
+  <footer class="reveal">
+    <div class="footer-icons">
+      <a href="https://www.linkedin.com/in/massey-vo-856518291" target="_blank" rel="noopener" class="footer-icon" aria-label="LinkedIn" title="Open LinkedIn">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
+        <span class="icon-label">LinkedIn</span>
+      </a>
+      <button type="button" class="footer-icon" data-copy-email="masseyvo000@gmail.com" aria-label="Copy email address" title="Copy email address">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        <span class="icon-label">Copy email</span>
+      </button>
+    </div>
+    <div class="footer-text">© 2026 Massey Vo · Golden hour, still building</div>
+  </footer>
+
+</main>
+
+<script>
+const twi = document.getElementById('twilight');
+const colors = ['', '', '', 'amber', 'pink'];
+for (let i = 0; i < 50; i++) {
+  const s = document.createElement('div');
+  s.className = 'twi-star ' + colors[Math.floor(Math.random() * colors.length)];
+  const size = Math.random() * 2 + 1;
+  s.style.width = size + 'px';
+  s.style.height = size + 'px';
+  s.style.left = Math.random() * 100 + '%';
+  s.style.top = Math.random() * 100 + '%';
+  s.style.animationDelay = Math.random() * 3 + 's';
+  s.style.animationDuration = (Math.random() * 3 + 2) + 's';
+  twi.appendChild(s);
+}
+
+// Footer email copy
+document.querySelectorAll('[data-copy-email]').forEach(btn => {
+  btn.addEventListener('click', async () => {
+    const email = btn.dataset.copyEmail;
+    const label = btn.querySelector('.icon-label');
+    try {
+      await navigator.clipboard.writeText(email);
+      const orig = label.textContent;
+      label.textContent = 'Copied!';
+      btn.classList.add('copied');
+      setTimeout(() => {
+        btn.classList.remove('copied');
+        label.textContent = orig;
+      }, 1800);
+    } catch (e) {
+      window.location.href = 'mailto:' + email;
+    }
+  });
+});
+
+</script>
+
+</body>
+</html>

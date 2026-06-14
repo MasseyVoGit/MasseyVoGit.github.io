@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Massey Vo // AI-Driven Traffic Signal Optimization</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Press+Start+2P&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #1a2540;
+    --bg-alt: #243454;
+    --bg-soft: #2d3f63;
+    --dialog-bg: #eef4fa;
+    --dialog-border-outer: #5499c7;
+    --dialog-border-mid: #2e6da4;
+    --dialog-border-inner: #1c4a78;
+    --dialog-shadow: #0a1730;
+    --text: #1f3d52;
+    --text-dim: #5a778a;
+    --text-light: #c8dde9;
+    --text-light-dim: #8a9fb5;
+    --accent-ice: #6bb8e0;
+    --accent-ice-light: #a8d4ec;
+    --accent-ice-dark: #2e7eb0;
+    --accent-moon: #f5e6a8;
+    --accent-cedar: #d87a5a;
+    --accent-cedar-dark: #a85535;
+    --accent-pine: #5a9070;
+    --accent-pine-dark: #3a6650;
+    --accent-aurora: #b896d9;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'JetBrains Mono', monospace;
+    background:
+      linear-gradient(180deg, #0d1530 0%, #1a2540 25%, #243454 55%, #2d3f63 100%);
+    color: var(--text-light);
+    line-height: 1.7;
+    min-height: 100vh;
+    overflow-x: hidden;
+    position: relative;
+  }
+
+  .aurora {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: 50vh;
+    background:
+      radial-gradient(ellipse at 20% 10%, rgba(184, 150, 217, 0.35) 0%, transparent 55%),
+      radial-gradient(ellipse at 70% 20%, rgba(107, 184, 224, 0.3) 0%, transparent 55%);
+    z-index: 0;
+    pointer-events: none;
+    animation: auroraShift 25s ease-in-out infinite;
+  }
+  @keyframes auroraShift {
+    0%, 100% { opacity: 0.85; }
+    50% { opacity: 1; }
+  }
+
+  .starfield {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: 60vh;
+    overflow: hidden;
+    z-index: 0;
+    pointer-events: none;
+  }
+  .star {
+    position: absolute;
+    background: white;
+    border-radius: 50%;
+    animation: twinkle 3s ease-in-out infinite;
+  }
+  .star.gold { background: var(--accent-moon); box-shadow: 0 0 4px var(--accent-moon); }
+  .star.cyan { background: var(--accent-ice-light); box-shadow: 0 0 4px var(--accent-ice-light); }
+  @keyframes twinkle {
+    0%, 100% { opacity: 0.4; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.3); }
+  }
+
+  .snowfall {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    overflow: hidden;
+    z-index: 2;
+    pointer-events: none;
+  }
+  .snowflake {
+    position: absolute;
+    color: white;
+    animation: fall linear infinite;
+    opacity: 0;
+  }
+  @keyframes fall {
+    0% { transform: translateY(-20px); opacity: 0; }
+    10% { opacity: 0.9; }
+    90% { opacity: 0.9; }
+    100% { transform: translateY(110vh) translateX(40px); opacity: 0; }
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.3 0 0 0 0 0.4 0 0 0 0 0.6 0 0 0 0.05 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 1000;
+    opacity: 0.6;
+    mix-blend-mode: overlay;
+  }
+
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    background: var(--dialog-bg);
+    padding: 14px 32px;
+    z-index: 100;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow:
+      inset 0 0 0 2px var(--dialog-border-outer),
+      inset 0 0 0 4px var(--dialog-bg),
+      inset 0 0 0 5px var(--dialog-border-inner),
+      0 4px 16px rgba(13, 21, 48, 0.5);
+  }
+  .nav-brand {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 12px;
+    color: var(--dialog-border-inner);
+    text-decoration: none;
+    letter-spacing: 1px;
+  }
+  .back-link {
+    color: var(--text-dim);
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 500;
+    transition: color 0.2s;
+  }
+  .back-link:hover { color: var(--accent-cedar-dark); }
+
+  main {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 110px 32px 120px;
+    position: relative;
+    z-index: 10;
+  }
+
+  .breadcrumb {
+    color: var(--accent-ice-light);
+    font-size: 13px;
+    margin-bottom: 24px;
+    text-shadow: 0 0 8px rgba(107, 184, 224, 0.3);
+  }
+  .breadcrumb a { color: var(--accent-cedar); text-decoration: none; }
+  .breadcrumb a:hover { color: var(--accent-moon); }
+
+  h1 {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 26px;
+    line-height: 1.5;
+    margin-bottom: 16px;
+    color: var(--text-light);
+    letter-spacing: 1px;
+    text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.4), 0 0 20px rgba(107, 184, 224, 0.4);
+  }
+
+  .subtitle {
+    color: var(--accent-moon);
+    font-size: 14px;
+    margin-bottom: 24px;
+    font-style: italic;
+  }
+
+  .meta-row {
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+    margin-bottom: 32px;
+    padding: 16px 20px;
+    background: rgba(36, 52, 84, 0.6);
+    border-radius: 8px;
+    border-left: 3px solid var(--accent-cedar);
+  }
+  .meta-item {
+    font-size: 12px;
+    color: var(--text-light-dim);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  .meta-item strong {
+    display: block;
+    color: var(--text-light);
+    font-size: 13px;
+    margin-top: 2px;
+    text-transform: none;
+    letter-spacing: 0;
+    font-weight: 500;
+  }
+
+  .content-block {
+    background: var(--dialog-bg);
+    padding: 28px;
+    border-radius: 12px;
+    margin-bottom: 24px;
+    box-shadow:
+      inset 0 0 0 2px var(--dialog-border-outer),
+      inset 0 0 0 5px var(--dialog-bg),
+      inset 0 0 0 7px var(--dialog-border-inner),
+      0 5px 0 var(--dialog-shadow),
+      0 8px 24px rgba(13, 21, 48, 0.5);
+  }
+  .content-block h2 {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 14px;
+    color: var(--accent-cedar-dark);
+    margin-bottom: 16px;
+    padding-bottom: 10px;
+    border-bottom: 2px dashed var(--accent-ice-light);
+    letter-spacing: 1px;
+  }
+  .content-block h2::before {
+    content: '▸ ';
+    color: var(--accent-cedar);
+  }
+  .content-block p {
+    color: var(--text);
+    font-size: 14px;
+    margin-bottom: 14px;
+  }
+  .content-block p:last-child { margin-bottom: 0; }
+  .content-block ul {
+    color: var(--text);
+    font-size: 14px;
+    padding-left: 24px;
+    margin-bottom: 14px;
+  }
+  .content-block li { margin-bottom: 6px; }
+  .content-block strong {
+    color: var(--accent-cedar-dark);
+    font-weight: 500;
+  }
+
+  .results-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    margin-top: 8px;
+  }
+  @media (max-width: 768px) {
+    .results-grid { grid-template-columns: 1fr; }
+  }
+  .result-box {
+    background: rgba(216, 122, 90, 0.1);
+    border: 2px solid var(--accent-cedar);
+    border-radius: 8px;
+    padding: 16px;
+  }
+  .result-box .label {
+    font-size: 11px;
+    color: var(--accent-cedar-dark);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 6px;
+    font-weight: 500;
+  }
+  .result-box .value {
+    font-size: 22px;
+    color: var(--text);
+    font-weight: 500;
+    font-family: 'Press Start 2P', monospace;
+  }
+
+  .pdf-block {
+    background: var(--dialog-bg);
+    padding: 20px;
+    border-radius: 12px;
+    margin-bottom: 24px;
+    box-shadow:
+      inset 0 0 0 2px var(--dialog-border-outer),
+      inset 0 0 0 5px var(--dialog-bg),
+      inset 0 0 0 7px var(--dialog-border-inner),
+      0 5px 0 var(--dialog-shadow),
+      0 8px 24px rgba(13, 21, 48, 0.5);
+  }
+  .pdf-block-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .pdf-block-header h2 {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 14px;
+    color: var(--accent-cedar-dark);
+    letter-spacing: 1px;
+  }
+  .pdf-block-header h2::before {
+    content: '▸ ';
+    color: var(--accent-cedar);
+  }
+  .pdf-frame {
+    width: 100%;
+    height: 80vh;
+    min-height: 600px;
+    border: 2px solid var(--dialog-border-inner);
+    border-radius: 6px;
+    background: #1a2540;
+  }
+
+  .btn {
+    display: inline-block;
+    padding: 10px 20px;
+    background: var(--dialog-bg);
+    color: var(--dialog-border-inner);
+    text-decoration: none;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border-radius: 8px;
+    border: none;
+    box-shadow:
+      inset 0 0 0 2px var(--dialog-border-outer),
+      inset 0 0 0 4px var(--dialog-bg),
+      inset 0 0 0 5px var(--dialog-border-inner),
+      0 3px 0 var(--dialog-shadow);
+  }
+  .btn:hover {
+    transform: translateY(-2px);
+    color: var(--accent-cedar-dark);
+    box-shadow:
+      inset 0 0 0 2px var(--dialog-border-outer),
+      inset 0 0 0 4px #e0eaf2,
+      inset 0 0 0 5px var(--dialog-border-inner),
+      0 5px 0 var(--dialog-shadow);
+  }
+
+  footer {
+    margin-top: 60px;
+    padding: 24px;
+    text-align: center;
+    background: var(--dialog-bg);
+    border-radius: 12px;
+    box-shadow:
+      inset 0 0 0 2px var(--dialog-border-outer),
+      inset 0 0 0 4px var(--dialog-bg),
+      inset 0 0 0 5px var(--dialog-border-inner),
+      0 3px 0 var(--dialog-shadow);
+  }
+  .contact-links {
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+  }
+  .contact-links a {
+    color: var(--dialog-border-inner);
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 500;
+  }
+  .contact-links a:hover { color: var(--accent-cedar-dark); }
+  .footer-text { font-size: 11px; color: var(--text-dim); }
+
+  @media (max-width: 640px) {
+    nav { padding: 12px 20px; }
+    main { padding: 90px 20px 80px; }
+    h1 { font-size: 18px; }
+    .pdf-frame { height: 60vh; }
+  }
+
+  /* Footer icon links */
+  .footer-icons {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    margin-bottom: 14px;
+    flex-wrap: wrap;
+  }
+  .footer-icon {
+    position: relative;
+    width: 44px;
+    height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    border-radius: 10px;
+    text-decoration: none;
+    color: var(--dialog-border-inner);
+    transition: all 0.15s;
+    padding: 0;
+    font-family: inherit;
+  }
+  .footer-icon svg {
+    width: 22px;
+    height: 22px;
+    transition: transform 0.2s;
+  }
+  .footer-icon:hover {
+    color: var(--accent-cedar-dark, var(--accent-magenta-dark, var(--accent-cyan-dark, var(--accent-coral-dark))));
+    transform: translateY(-2px);
+  }
+  .footer-icon:hover svg {
+    transform: scale(1.1);
+  }
+  .icon-label {
+    position: absolute;
+    bottom: -28px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--dialog-border-inner);
+    color: var(--dialog-bg);
+    padding: 3px 10px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 500;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s, bottom 0.2s;
+  }
+  .footer-icon:hover .icon-label {
+    opacity: 1;
+    bottom: -32px;
+  }
+  .footer-icon.copied .icon-label {
+    opacity: 1;
+    bottom: -32px;
+    background: var(--accent-cedar, var(--accent-magenta, var(--accent-cyan, var(--accent-coral))));
+    color: white;
+  }
+
+</style>
+</head>
+<body>
+
+<div class="aurora"></div>
+<div class="starfield" id="starfield"></div>
+<div class="snowfall" id="snowfall"></div>
+
+<nav>
+  <a href="index.html" class="nav-brand">MV//</a>
+  <a href="index.html" class="back-link">← Back to portfolio</a>
+</nav>
+
+<main>
+
+  <div class="breadcrumb">
+    <a href="index.html">Portfolio</a> / Projects / Traffic Signal Optimization
+  </div>
+
+  <h1>AI-Driven Traffic Signal Optimization</h1>
+  <p class="subtitle">Adaptive control via Q-Learning, evaluated in SUMO across 11 connected-vehicle penetration rates</p>
+
+  <div class="meta-row">
+    <div class="meta-item">Role<strong>Independent Researcher</strong></div>
+    <div class="meta-item">Institution<strong>UEC / AWCC, Tokyo</strong></div>
+    <div class="meta-item">Advisor<strong>Prof. Takeo Fujii</strong></div>
+    <div class="meta-item">Stack<strong>Python · SUMO · Q-Learning</strong></div>
+    <div class="meta-item">Year<strong>2024</strong></div>
+  </div>
+
+  <div class="content-block">
+    <h2>Overview</h2>
+    <p>This research designs and evaluates a reinforcement learning system that adapts traffic signal timing in real time. Conducted during a year-long academic exchange at the <strong>Advanced Wireless Communication Research Center (AWCC)</strong> at the University of Electro-Communications in Tokyo, the work targets a real urban mobility problem: traditional fixed-timing signals cannot respond to live traffic conditions, leading to inefficiency, idling, and avoidable congestion.</p>
+    <p>The proposed algorithm uses <strong>Q-Learning</strong> to dynamically extend or hold green signal time at an intersection based on queue length and Connected and Automated Vehicle (CAV) data. The system was simulated and benchmarked against two industry baselines — Fixed-Time (FT) control and Traffic-Actuated Control (TAC) — across CAV market penetration rates from 0% to 100%.</p>
+  </div>
+
+  <div class="content-block">
+    <h2>Approach</h2>
+    <p><strong>State representation.</strong> Twenty-four states defined by the relative ordering of queue lengths across the four approaches at the intersection, giving the algorithm a compact but expressive view of current conditions.</p>
+    <p><strong>Action space.</strong> Two actions per decision point: extend the current green phase by one second, or hold. Small, frequent decisions let the algorithm adapt smoothly rather than make disruptive switches.</p>
+    <p><strong>Reward function.</strong> A weighted combination of queue length measured by loop detectors and queue length detected by CAVs. The weighting shifts based on current CAV market penetration — the algorithm leans more on CAV data as more connected vehicles appear in the traffic mix.</p>
+    <p><strong>Simulation environment.</strong> A four-leg, three-lanes-per-approach intersection built in <strong>SUMO</strong> (Simulation of Urban Mobility), with 1,000 vehicles per hour per approach. The Intelligent Driver Model (IDM) was used for human-driven vehicles and the Cooperative Adaptive Cruise Control (CACC) model for CAVs.</p>
+  </div>
+
+  <div class="content-block">
+    <h2>Results</h2>
+    <p>The proposed algorithm consistently outperformed both Fixed-Time and Traffic-Actuated baselines, with the largest improvements at higher CAV penetration rates (above 50%).</p>
+    <div class="results-grid">
+      <div class="result-box">
+        <div class="label">Reduction in Avg. Delay</div>
+        <div class="value">9.1 – 16.9%</div>
+      </div>
+      <div class="result-box">
+        <div class="label">Conflict Rate</div>
+        <div class="value">Reduced</div>
+      </div>
+      <div class="result-box">
+        <div class="label">Penetration Rates Tested</div>
+        <div class="value">11 (0–100%)</div>
+      </div>
+      <div class="result-box">
+        <div class="label">Robustness</div>
+        <div class="value">Held under peak demand</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="content-block">
+    <h2>What I Did</h2>
+    <ul>
+      <li>Owned the project end-to-end: problem framing, literature review, algorithm design, simulation build, statistical analysis, and final paper</li>
+      <li>Implemented the Q-Learning agent and reward function in Python</li>
+      <li>Built and configured the SUMO simulation environment, including intersection geometry, detector placement, and vehicle models</li>
+      <li>Ran benchmarks across eleven CAV market penetration rates and compared against Fixed-Time and Traffic-Actuated control baselines</li>
+      <li>Performed robustness analysis under elevated traffic demand to validate the algorithm under stress</li>
+      <li>Authored the conference-format paper presented at UEC</li>
+    </ul>
+  </div>
+
+  <div class="pdf-block">
+    <div class="pdf-block-header">
+      <h2>Full Paper</h2>
+      <a href="traffic-signal-research.pdf" target="_blank" class="btn">Open in New Tab</a>
+    </div>
+    <iframe src="traffic-signal-research.pdf" class="pdf-frame" title="AI-Driven Traffic Signal Optimization Research Paper"></iframe>
+  </div>
+
+  <footer class="reveal">
+    <div class="footer-icons">
+      <a href="https://www.linkedin.com/in/massey-vo-856518291" target="_blank" rel="noopener" class="footer-icon" aria-label="LinkedIn" title="Open LinkedIn">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
+        <span class="icon-label">LinkedIn</span>
+      </a>
+      <button type="button" class="footer-icon" data-copy-email="masseyvo000@gmail.com" aria-label="Copy email address" title="Copy email address">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        <span class="icon-label">Copy email</span>
+      </button>
+    </div>
+    <div class="footer-text">© 2026 Massey Vo · Under a quiet moon</div>
+  </footer>
+
+</main>
+
+<script>
+const starfield = document.getElementById('starfield');
+const starColors = ['', '', '', '', '', 'gold', 'cyan'];
+for (let i = 0; i < 100; i++) {
+  const star = document.createElement('div');
+  star.className = 'star ' + starColors[Math.floor(Math.random() * starColors.length)];
+  const size = Math.random() * 2 + 1;
+  star.style.width = size + 'px';
+  star.style.height = size + 'px';
+  star.style.left = Math.random() * 100 + '%';
+  star.style.top = Math.random() * 100 + '%';
+  star.style.animationDelay = Math.random() * 3 + 's';
+  star.style.animationDuration = (Math.random() * 3 + 2) + 's';
+  starfield.appendChild(star);
+}
+
+const snowfall = document.getElementById('snowfall');
+const snowChars = ['❄', '❅', '❆', '·', '*'];
+for (let i = 0; i < 60; i++) {
+  const flake = document.createElement('div');
+  flake.className = 'snowflake';
+  flake.textContent = snowChars[Math.floor(Math.random() * snowChars.length)];
+  flake.style.left = Math.random() * 100 + '%';
+  flake.style.fontSize = (Math.random() * 16 + 8) + 'px';
+  flake.style.animationDuration = (Math.random() * 15 + 10) + 's';
+  flake.style.animationDelay = (Math.random() * 15) + 's';
+  flake.style.opacity = Math.random() * 0.6 + 0.3;
+  snowfall.appendChild(flake);
+}
+
+// Footer email copy
+document.querySelectorAll('[data-copy-email]').forEach(btn => {
+  btn.addEventListener('click', async () => {
+    const email = btn.dataset.copyEmail;
+    const label = btn.querySelector('.icon-label');
+    try {
+      await navigator.clipboard.writeText(email);
+      const orig = label.textContent;
+      label.textContent = 'Copied!';
+      btn.classList.add('copied');
+      setTimeout(() => {
+        btn.classList.remove('copied');
+        label.textContent = orig;
+      }, 1800);
+    } catch (e) {
+      window.location.href = 'mailto:' + email;
+    }
+  });
+});
+
+</script>
+
+</body>
+</html>
